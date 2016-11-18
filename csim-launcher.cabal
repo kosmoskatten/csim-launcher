@@ -15,11 +15,17 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     CSIM.Launcher.Range
+  exposed-modules:     CSIM.Launcher
+  other-modules:       CSIM.Launcher.Component
+                       CSIM.Launcher.Range
+                       CSIM.Launcher.StartSpecification
+                       CSIM.Launcher.SystemDefinition
   build-depends:       base >= 4.7 && < 5
                      , aeson
                      , attoparsec
+                     , bytestring
                      , text
+                     , unordered-containers
   default-language:    Haskell2010
   ghc-options:         -Wall
 

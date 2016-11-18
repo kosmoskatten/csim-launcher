@@ -1,21 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 module CSIM.Launcher.Range
-    ( Cmp (..)
-    , Range (..)
+    ( Range (..)
     , Version (..)
     , inRange
     ) where
 
-import           Data.Aeson
+import           Control.Monad        (void)
+import           Data.Aeson           (FromJSON (..), Value (..))
 import           Data.Aeson.Types     (typeMismatch)
-import           Data.Attoparsec.Text
+import           Data.Attoparsec.Text (Parser, char, choice, decimal,
+                                       endOfInput, parseOnly, skipSpace, string)
 
-type Op = (Version -> Version -> Bool)
-
-data Cmp = CmpLT | CmpLE | CmpGT | CmpGE
-    deriving Show
-
-data Range = Range !Version !Cmp !Cmp !Version
+data Range = Range !Version !Version
     deriving Show
 
 -- | It seem that default derivation of Ord is ok for the handling of
@@ -28,27 +24,24 @@ instance FromJSON Range where
         either fail return $ parseOnly range str
     parseJSON invalid      = typeMismatch "Range" invalid
 
-inRange :: Range -> Version -> Bool
-inRange (Range low cmp1 cmp2 high) v =
-    low `op1` v && v `op2` high
-  where
-     op1 = toOp cmp1
-     op2 = toOp cmp2
+instance FromJSON Version where
+    parseJSON (String str) =
+        either fail return $ parseOnly version str
+    parseJSON invalid      = typeMismatch "Version" invalid
 
-toOp :: Cmp -> Op
-toOp CmpLT = (<)
-toOp CmpLE = (<=)
-toOp CmpGT = (>)
-toOp CmpGE = (>=)
+inRange :: Version -> Range -> Bool
+inRange v (Range low high) = low <= v && v < high
 
 range :: Parser Range
 range = range' <* (skipSpace >> endOfInput)
   where
-    range' =
-        Range <$> (skipSpace *> version)
-              <*> (skipSpace *> cmp)
-              <*> ((skipSpace *> char 'v') *> (skipSpace *> cmp))
-              <*> (skipSpace *> version)
+    range' = do
+        low <- skipSpace *> version
+        void $ skipSpace *> string "<="
+        void $ skipSpace *> char 'v'
+        void $ skipSpace *> char '<'
+        high <- skipSpace *> version
+        return $ Range low high
 
 version :: Parser Version
 version = choice [longVersion, shortVersion]
@@ -67,10 +60,3 @@ shortVersion =
 
 versionDigit :: Parser Int
 versionDigit = decimal
-
-cmp :: Parser Cmp
-cmp = choice [ string ">=" *> pure CmpGE
-             , string "<=" *> pure CmpLE
-             , string ">"  *> pure CmpGT
-             , string "<"  *> pure CmpLT
-             ]
