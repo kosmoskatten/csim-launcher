@@ -11,12 +11,12 @@ import           Data.Text
 import           GHC.Generics        (Generic)
 
 type Provides     = HashMap Text Version
-type Dependencies = HashMap Text Range
+type DependsOn    = HashMap Text Range
 
 data Component = Component
-    { name         :: !Text
-    , summary      :: !Text
-    , version      :: !Version
-    , provides     :: !Provides
-    , dependencies :: !Dependencies
+    { name      :: !Text
+    , summary   :: !Text
+    , version   :: !Version
+    , provides  :: !Provides
+    , dependsOn :: !DependsOn
     } deriving (Show, Generic, FromJSON)

@@ -10,14 +10,20 @@ import           Data.Aeson           (FromJSON (..), Value (..))
 import           Data.Aeson.Types     (typeMismatch)
 import           Data.Attoparsec.Text (Parser, char, choice, decimal,
                                        endOfInput, parseOnly, skipSpace, string)
+import           Text.Printf          (printf)
 
 data Range = Range !Version !Version
-    deriving Show
 
 -- | It seem that default derivation of Ord is ok for the handling of
 -- sematic versions. Perhaps quick-check stuff?
 data Version = Version !Int !Int !Int
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord)
+
+instance Show Range where
+    show (Range low high) = printf "%s <= v < %s" (show low) (show high)
+
+instance Show Version where
+    show (Version major minor patch) = printf "%d.%d.%d" major minor patch
 
 instance FromJSON Range where
     parseJSON (String str) =

@@ -2,28 +2,43 @@
   "components" :
     [
       {
-        "name"     : "bid/gte",
-        "version"  : "3.1.6",
-        "summary"  : "GTE 4G/5G simulator",
+        "name"     : "bid/compA",
+        "version"  : "1.1.2",
+        "summary"  : "The component A",
         "provides" :
-          { "msue" : "1.1",
-            "mme"  : "1.3",
-            "enb"  : "1.8"
-          },
-        "dependencies" :
           {
-            "logger" : "2.1 <= v < 3.0"
+            "servA1" : "1.1",
+            "servA2" : "1.4",
+            "servA3" : "1.8"
+          },
+        "dependsOn" :
+          {
+            "servB1" : "2.1 <= v < 3.0"
           }
       },
       {
-        "name" : "bid/logcollector",
-        "version" : "2.3.0",
-        "summary" : "Cloud log collector",
+        "name"     : "bid/compB",
+        "version"  : "2.3.6",
+        "summary"  : "The component B",
         "provides" :
           {
-            "logger" : "2.3"
+            "servB1" : "2.6",
+            "servB2" : "2.0"
           },
-        "dependencies" : {}
+        "dependsOn" :
+          {
+            "servC1" : "3.0 <= v < 4.0"
+          }
+      },
+      {
+        "name"     : "bid/compC",
+        "version"  : "3.0.14",
+        "summary"  : "The component C",
+        "provides" :
+          {
+            "servC1" : "3.0"
+          },
+        "dependsOn" : {}
       }
     ]
 }
