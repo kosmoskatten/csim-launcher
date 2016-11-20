@@ -6,16 +6,17 @@ module CSIM.Launcher.Range
     ) where
 
 import           Control.Monad        (void)
-import           Data.Aeson           (FromJSON (..), Value (..))
+import           Data.Aeson           (FromJSON (..), ToJSON (..), Value (..))
 import           Data.Aeson.Types     (typeMismatch)
 import           Data.Attoparsec.Text (Parser, char, choice, decimal,
                                        endOfInput, parseOnly, skipSpace, string)
+import           Data.Text            (pack)
 import           Text.Printf          (printf)
 
 data Range = Range !Version !Version
 
 -- | It seem that default derivation of Ord is ok for the handling of
--- sematic versions. Perhaps quick-check stuff?
+-- semantic versions. Perhaps quick-check stuff?
 data Version = Version !Int !Int !Int
     deriving (Eq, Ord)
 
@@ -30,10 +31,16 @@ instance FromJSON Range where
         either fail return $ parseOnly range str
     parseJSON invalid      = typeMismatch "Range" invalid
 
+instance ToJSON Range where
+    toJSON = String . pack . show
+
 instance FromJSON Version where
     parseJSON (String str) =
         either fail return $ parseOnly version str
     parseJSON invalid      = typeMismatch "Version" invalid
+
+instance ToJSON Version where
+    toJSON = String . pack . show
 
 inRange :: Version -> Range -> Bool
 inRange v (Range low high) = low <= v && v < high

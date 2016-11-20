@@ -5,9 +5,9 @@ module CSIM.Launcher.SystemDefinition
     ) where
 
 import           CSIM.Launcher.Component (Component)
-import           Data.Aeson              (FromJSON)
+import           Data.Aeson              (FromJSON, ToJSON)
 import           GHC.Generics            (Generic)
 
 data SystemDefinition = SystemDefinition
     { components :: ![Component]
-    } deriving (Show, Generic, FromJSON)
+    } deriving (Show, Generic, FromJSON, ToJSON)

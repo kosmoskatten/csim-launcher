@@ -5,7 +5,7 @@ module CSIM.Launcher.Component
     ) where
 
 import           CSIM.Launcher.Range (Range, Version)
-import           Data.Aeson
+import           Data.Aeson          (FromJSON, ToJSON)
 import           Data.HashMap.Lazy   (HashMap)
 import           Data.Text
 import           GHC.Generics        (Generic)
@@ -19,4 +19,4 @@ data Component = Component
     , version   :: !Version
     , provides  :: !Provides
     , dependsOn :: !DependsOn
-    } deriving (Show, Generic, FromJSON)
+    } deriving (Show, Generic, FromJSON, ToJSON)
