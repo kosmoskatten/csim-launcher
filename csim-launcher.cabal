@@ -16,7 +16,8 @@ cabal-version:       >=1.10
 library
   hs-source-dirs:      src
   exposed-modules:     CSIM.Launcher
-  other-modules:       CSIM.Launcher.Component
+  other-modules:       CSIM.Launcher.Backend
+                       CSIM.Launcher.Component
                        CSIM.Launcher.Range
                        CSIM.Launcher.StartSpecification
                        CSIM.Launcher.SystemDefinition
@@ -32,6 +33,7 @@ library
 executable launcher
   hs-source-dirs:      app
   main-is:             Main.hs
+  other-modules:       DryRunBackend
   ghc-options:         -Wall
   build-depends:       base
                      , aeson

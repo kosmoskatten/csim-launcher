@@ -1,5 +1,6 @@
 module CSIM.Launcher
-    ( Component (..)
+    ( Backend (..)
+    , Component (..)
     , Range (..)
     , StartSpecification (..)
     , SystemDefinition (..)
@@ -10,6 +11,7 @@ module CSIM.Launcher
     ) where
 
 import           Control.Monad                    (foldM)
+import           CSIM.Launcher.Backend            (Backend (..))
 import           CSIM.Launcher.Component          (Component (..))
 import           CSIM.Launcher.Range              (Range (..), Version (..),
                                                    inRange)

@@ -9,10 +9,10 @@ import           Control.Concurrent  (threadDelay)
 import           Control.Monad       (forever, void)
 import           CSIM.Launcher
 import           Data.Aeson          (ToJSON)
+import           DryRunBackend       (create)
 import           GHC.Generics        (Generic)
 import           Network.Nats
 import           Options.Applicative
-import           Text.Printf         (printf)
 
 data Options = Options
     { natsUri :: !String
@@ -20,8 +20,14 @@ data Options = Options
     , dryRun  :: !Bool
     } deriving Show
 
+data Runtime a = Runtime
+    { sys     :: !SystemDefinition
+    , backend :: !a
+    }
+
 data LauncherReply = LauncherReply
     { status :: !Int
+    , errMsg :: !(Maybe String)
     } deriving (Show, Generic, ToJSON)
 
 main :: IO ()
@@ -31,33 +37,54 @@ main = do
         =<< (systemDefinitionFromFile $ sysPath opts)
 
 runLauncher :: Options -> SystemDefinition -> IO ()
-runLauncher opts sys =
+runLauncher opts sys' = do
+    backend' <- create
+    let runtime = Runtime { sys     = sys'
+                          , backend = backend'
+                          }
     withNats defaultSettings [natsUri opts] $ \nats -> do
         void $ subscribeAsync nats "sys.launcher.applyStartSpec"
-                              Nothing (startSpecHandler nats)
+                              Nothing (startSpecHandler runtime nats)
         keepAlive
 
-startSpecHandler :: Nats -> Msg -> IO ()
-startSpecHandler nats msg =
+startSpecHandler :: Backend a => Runtime a -> Nats -> Msg -> IO ()
+startSpecHandler rt nats msg =
     maybe handleDecodeError applyStartSpec decodeStartSpec
   where
     handleDecodeError :: IO ()
     handleDecodeError =
         maybe (return ())
               (\topic' ->
-                  publishJson nats topic' Nothing LauncherReply { status = 401 }
+                  publishJson nats topic'
+                              Nothing
+                              LauncherReply { status = 401
+                                            , errMsg = Just "Cannot decode JSON"
+                                            }
               ) $ replyTo msg
 
     applyStartSpec :: StartSpecification -> IO ()
     applyStartSpec start = do
-        print start
+        let startSet = calculateStartSet (sys rt) start
+        reply <-
+            case startSet of
+                Right cs -> do
+                    mapM_ (launch (backend rt) Nothing) cs
+                    return LauncherReply { status = 200
+                                         , errMsg = Nothing
+                                         }
+                Left err -> return LauncherReply { status = 409
+                                                 , errMsg = Just err
+                                                 }
         maybe (return ())
               (\topic' ->
-                  publishJson nats topic' Nothing LauncherReply { status = 200 }
+                  publishJson nats topic' Nothing reply
               ) $ replyTo msg
 
     decodeStartSpec :: Maybe StartSpecification
     decodeStartSpec = jsonPayload msg
+
+--mkBackend :: Options -> IO (Runtime a)
+--mkBackend _ = Runtime <$> create
 
 keepAlive :: IO ()
 keepAlive = forever $ threadDelay 1000000
