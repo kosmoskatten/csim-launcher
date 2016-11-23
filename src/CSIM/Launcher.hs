@@ -8,6 +8,7 @@ module CSIM.Launcher
     , startSpecificationFromFile
     , systemDefinitionFromFile
     , calculateStartSet
+    , checkSystemDefinition
     ) where
 
 import           Control.Monad                    (foldM)
@@ -37,6 +38,12 @@ systemDefinitionFromFile file = eitherDecode <$> LBS.readFile file
 calculateStartSet :: SystemDefinition -> StartSpecification
                   -> Either String [Component]
 calculateStartSet sys start = expandReqs sys =<< findComponents sys start
+
+checkSystemDefinition :: SystemDefinition -> Either String String
+checkSystemDefinition sys =
+    case expandReqs sys $ components sys of
+        Right _  -> Right "OK"
+        Left err -> Left err
 
 -- | From the 'StartSpecification' and the 'SystemDefinition' find a set of
 -- 'Component's that is matching the requirements in the 'StartSpecification'.
