@@ -36,7 +36,7 @@
         "summary"  : "The component C",
         "provides" :
           {
-            "servC1" : "3.0"
+            "servC1" : "3.1"
           },
         "dependsOn" : {}
       }

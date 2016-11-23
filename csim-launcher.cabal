@@ -30,28 +30,14 @@ library
   default-language:    Haskell2010
   ghc-options:         -Wall
 
-executable launcher
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  other-modules:       DryRunBackend
-  ghc-options:         -Wall
-  build-depends:       base
-                     , aeson
-                     , csim-launcher
-                     , hats
-                     , optparse-applicative
-  default-language:    Haskell2010
-
-executable launcher-client
-  hs-source-dirs:      test-client
-  main-is:             Main.hs
-  ghc-options:         -Wall
-  build-depends:       base
-                     , aeson
-                     , csim-launcher
-                     , hats
-                     , optparse-applicative
-  default-language:    Haskell2010
+executable apply-start-spec
+  hs-source-dirs:     app
+  main-is:            ApplyStartSpec.hs
+  ghc-options:        -Wall
+  build-depends:      base
+                    , csim-launcher
+                    , optparse-applicative
+  default-language:   Haskell2010
 
 source-repository head
   type:     git
